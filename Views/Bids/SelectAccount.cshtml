@@ -1,0 +1,21 @@
+﻿@{
+    ViewData["Title"] = "Select Account";
+}
+
+<div class="container">
+    <h2>Select Account</h2>
+
+    <form asp-action="SelectAccount" method="post">
+        <div class="form-group">
+            <label for="accountId">Account</label>
+            <select class="form-control" id="accountId" name="accountId" required>
+                <option value="">Select Account</option>
+                @foreach (var account in ViewBag.Accounts as List<Expense_Tracker_WebApp.Models.Account>)
+                {
+                    <option value="@account.Id">@account.Name</option>
+                }
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Enter</button>
+    </form>
+</div>

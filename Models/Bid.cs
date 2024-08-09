@@ -12,8 +12,6 @@ namespace Expense_Tracker_WebApp.Models
         public string Link { get; set; }
         public int AccountID { get; set; }
         public Account Account { get; set; }
-        public Guid UserID { get; set; }
-        public User User { get; set; }
         public DateTime DateTime { get; set; } = DateTime.Now;
     }
 }

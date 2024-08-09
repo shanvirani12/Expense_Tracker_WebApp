@@ -8,7 +8,7 @@ builder.Services.AddControllersWithViews();
 
 //DI
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-options.UseSqlServer(builder.Configuration.GetConnectionString("OfficeConnection")));
+options.UseSqlServer(builder.Configuration.GetConnectionString("HomeConnection")));
 
 //Register Syncfusion license
 Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Mgo+DSMBMAY9C3t2U1hhQlJBfVZdWnxLflFyVWJYdVx0flRHcDwsT3RfQFljQX5bdEZhX35acnFcQA==");
@@ -29,5 +29,9 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Dashboard}/{action=Index}/{id?}");
+
+app.MapControllerRoute(
+    name: "Bids",
+    pattern: "{controller=Bids}/{action=SelectAccount}/{id?}");
 
 app.Run();

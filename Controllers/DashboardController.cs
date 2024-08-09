@@ -26,6 +26,10 @@ namespace Expense_Tracker.Controllers
                 .Where(y => y.Date >= StartDate && y.Date <= EndDate)
                 .ToListAsync();
 
+            //Total Accounts
+            int TotalAccount = _context.Accounts.Count<Account>();
+            ViewBag.TotalAccount = TotalAccount.ToString();
+
             //Total Income
             int TotalIncome = SelectedTransactions
                 .Where(i => i.Category.Type == "Income")

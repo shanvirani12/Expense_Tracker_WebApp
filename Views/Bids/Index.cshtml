@@ -1,0 +1,47 @@
+﻿@model IEnumerable<Expense_Tracker_WebApp.Models.Bid>
+
+@{
+    ViewData["Title"] = "Today's Bids";
+}
+
+<div class="container">
+    <h2>Today's Bids</h2>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Bid ID</th>
+                <th>Account Name</th>
+                <th>Link</th>
+                <th>Date & Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var bid in Model)
+            {
+                <tr>
+                    <td>@bid.BidId</td>
+                    <td>@bid.Account.Name</td>
+                    <td><a href="@bid.Link" target="_blank">@bid.Link</a></td>
+                    <td>@bid.DateTime</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Sticky bar for adding a new bid -->
+<div class="sticky-bottom bg-dark p-3 shadow-sm">
+    <form asp-action="AddBid" method="post">
+        <input type="hidden" name="accountId" value="@ViewBag.AccountId" />
+        <div class="form-row align-items-center">
+            <div class="col-auto">
+                <label class="sr-only" for="link">Bid Link</label>
+                <input type="url" class="form-control mb-2" id="link" name="link" placeholder="Enter bid link" required>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary mb-2">Add Bid</button>
+            </div>
+        </div>
+    </form>
+</div>
