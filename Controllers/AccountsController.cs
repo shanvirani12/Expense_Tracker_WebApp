@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Expense_Tracker_WebApp.Models;
+using Expense_Tracker_WebApp.Data;
 
 namespace Expense_Tracker_WebApp.Controllers
 {
