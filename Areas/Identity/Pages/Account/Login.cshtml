@@ -6,11 +6,13 @@
     ViewData["Title"] = "Log in";
 }
 
-<h1 class="text-center">@ViewData["Title"]</h1>
-<div>
+<div class="login-container">
+    <div class="logo-container text-center mb-4">
+        <img src="~/GreyLogo.png" class="logo-image" alt="Company Logo" />
+    </div>
+    <h1 class="text-center mb-4">@ViewData["Title"]</h1>
     <section>
         <form id="account" method="post">
-            <h2 class="text-center mb-4">Use a local account to log in</h2>
             <hr />
             <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
             <div class="form-floating mb-3">
@@ -40,3 +42,34 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
+
+<style>
+    .login-container {
+        width: 500px;
+        margin: auto;
+        padding: 20px;
+    }
+
+    .logo-container {
+        margin-bottom: 20px;
+    }
+
+    .logo-image {
+        max-width: 200px;
+        height: auto;
+    }
+
+    .form-floating {
+        margin-bottom: 15px;
+    }
+
+    .btn-light {
+        background-color: #f8f9fa;
+        color: #343a40;
+    }
+
+    .btn-light:hover {
+        background-color: #e2e6ea;
+        color: #343a40;
+    }
+</style>

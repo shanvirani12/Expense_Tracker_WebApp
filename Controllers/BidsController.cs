@@ -4,9 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Expense_Tracker_WebApp.Data;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Expense_Tracker_WebApp.Controllers
 {
+    [Authorize]
     public class BidsController : Controller
     {
         private readonly ApplicationDbContext _context;

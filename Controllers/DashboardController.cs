@@ -7,7 +7,7 @@ using Expense_Tracker_WebApp.Data;
 
 namespace Expense_Tracker.Controllers
 {
-    
+    [Authorize]
     public class DashboardController : Controller
     {
 
@@ -29,9 +29,9 @@ namespace Expense_Tracker.Controllers
                 .Where(y => y.Date >= StartDate && y.Date <= EndDate)
                 .ToListAsync();
 
-            //Total Accounts
-            int TotalAccount = _context.Accounts.Count<Account>();
-            ViewBag.TotalAccount = TotalAccount.ToString();
+            int TotalTodayBid = await _context.Bids
+                .CountAsync(b => b.DateTime.Date == DateTime.Today);
+            ViewBag.TotalTodayBid = TotalTodayBid.ToString();
 
             //Total Income
             int TotalIncome = SelectedTransactions

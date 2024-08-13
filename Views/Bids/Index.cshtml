@@ -4,44 +4,74 @@
     ViewData["Title"] = "Today's Bids";
 }
 
-<div class="container">
-    <h2>Today's Bids</h2>
+<div class="container mt-5">
+    <h2 class="text-light">Today's Bids</h2>
 
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Bid ID</th>
-                <th>Account Name</th>
-                <th>Link</th>
-                <th>Date & Time</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var bid in Model)
-            {
+    <div class="table-responsive">
+        <table class="table table-dark table-hover rounded">
+            <thead class="thead-dark">
                 <tr>
-                    <td>@bid.BidId</td>
-                    <td>@bid.Account.Name</td>
-                    <td><a href="@bid.Link" target="_blank">@bid.Link</a></td>
-                    <td>@bid.DateTime</td>
+                    <th scope="col">Bid ID</th>
+                    <th scope="col">Account Name</th>
+                    <th scope="col">Link</th>
+                    <th scope="col">Date & Time</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var bid in Model)
+                {
+                    <tr>
+                        <td>@bid.BidId</td>
+                        <td>@bid.Account.Name</td>
+                        <td>
+                            <a href="@bid.Link" target="_blank" class="text-info">
+                                @bid.Link
+                            </a>
+                        </td>
+                        <td>@bid.DateTime.ToString("g")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <!-- Sticky bar for adding a new bid -->
-<div class="sticky-bottom bg-dark p-3 shadow-sm">
+<div class="sticky-bottom bg-dark p-3 shadow-lg">
     <form asp-action="AddBid" method="post">
         <input type="hidden" name="accountId" value="@ViewBag.AccountId" />
         <div class="form-row align-items-center">
             <div class="col-auto">
-                <label class="sr-only" for="link">Bid Link</label>
-                <input type="url" class="form-control mb-2" id="link" name="link" placeholder="Enter bid link" required>
+                <input type="url" class="form-control mb-2 bg-secondary text-light" id="link" name="link" placeholder="Enter bid link" required>
             </div>
             <div class="col-auto">
-                <button type="submit" class="btn btn-light mb-3">Add Bid</button>
+                <button type="submit" class="btn btn-outline-light mb-2">Add Bid</button>
             </div>
         </div>
     </form>
 </div>
+
+<style>
+    body {
+        background-color: #121212;
+        color: #e0e0e0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    h2 {
+        font-weight: 300;
+    }
+
+    .table-responsive {
+        margin-top: 20px;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #333333;
+    }
+
+    .sticky-bottom {
+        position: sticky;
+        bottom: 0;
+    }
+</style>

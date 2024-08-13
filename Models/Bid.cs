@@ -8,7 +8,7 @@ namespace Expense_Tracker_WebApp.Models
         [Key]
         public int BidId { get; set; }
 
-        [Column(TypeName = "nvarchar(100)")]
+        [Column(TypeName = "nvarchar(300)")]
         public string Link { get; set; }
         // Foreign key for relationship with Employee
         public string UserId { get; set; }

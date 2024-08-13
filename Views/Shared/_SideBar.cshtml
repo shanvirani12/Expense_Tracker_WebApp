@@ -19,7 +19,7 @@
     menuItems.Add(new
     {
         text = "Accounts",
-        iconCss = "fa-solid fa-arrow-right-arrow-left",
+        iconCss = "fa-light fa-file-invoice-dollar",
         url = "/Accounts"
     });
 
@@ -27,7 +27,7 @@
     {
         text = "Start Bidding",
         url = "/Bids",
-        iconCss = "fa-solid fa-folder-closed",
+        iconCss = "fa-light fa-ring",
     });
 
     menuItems.Add(new
@@ -62,7 +62,7 @@
 
         <div class="logo-wrapper">
             <div class="app-logo">
-                <img src="~/logo.png" />
+                <img src="~/GreyLogo.png" class="w-50 h-50" />
             </div>
             <div class="w-100"></div>
             <i id="sidebar-toggler" class="fa-solid"></i>
@@ -71,8 +71,8 @@
         <div class="profile-wrapper">
             <img class="profile-pic" src="~/profile.jpg" />
             <div class="titles d-flex flex-column ps-3">
-                <h6 class="mb-0">Wallet App</h6>
-                <span class="text-muted">Ashton Cox</span>
+                <h6 class="mb-0">Your Account</h6>
+                <span class="text-muted">@User.Identity.Name</span>
             </div>
         </div>
 

@@ -6,12 +6,13 @@
     ViewData["Title"] = "Register";
 }
 
-<h1 class="text-center">@ViewData["Title"]</h1>
-
-<div class="justify-content-center">
-    <div>
+<div class="container">
+    <div class="logo-container text-center mb-4">
+        <img src="~/GreyLogo.png" class="logo-image" alt="Company Logo" />
+    </div>
+    <div class="form-container">
         <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-            <h2 class="text-center">Create a new account.</h2>
+            <h2 class="text-center mb-4">Create a new account</h2>
             <hr />
             <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
 
@@ -53,3 +54,40 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
+
+<style>
+    .container {
+        width: 500px;
+        margin: auto;
+        padding: 20px;
+    }
+
+    .logo-container {
+        margin-bottom: 20px;
+    }
+
+    .logo-image {
+        max-width: 200px;
+        height: auto;
+    }
+
+    .form-container {
+        background-color: #343a40;
+        padding: 20px;
+        border-radius: 8px;
+    }
+
+    .form-floating {
+        margin-bottom: 15px;
+    }
+
+    .btn-light {
+        background-color: #f8f9fa;
+        color: #343a40;
+    }
+
+        .btn-light:hover {
+            background-color: #e2e6ea;
+            color: #343a40;
+        }
+</style>

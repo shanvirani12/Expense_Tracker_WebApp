@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Expense_Tracker_WebApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240812052936_BidTableUpdateuser")]
-    partial class BidTableUpdateuser
+    [Migration("20240813013905_BidUpdatetableuser")]
+    partial class BidUpdatetableuser
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
