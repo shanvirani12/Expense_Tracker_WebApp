@@ -14,7 +14,7 @@
                 <i class="fa-light fa-stopwatch-20" style="color: #74C0FC;"></i>
             </div>
             <div class="d-flex flex-column m-auto py-3">
-                <span class="lead">Today's Total Bids</span>
+                <span class="lead">Your Today's Bids</span>
                 <h1 class="display-6 fw-bold">@ViewBag.TotalTodayBid</h1>
             </div>
         </div>
@@ -26,8 +26,8 @@
                 <i class="fa-solid fa-dollar-sign fa-2xl"></i>
             </div>
             <div class="d-flex flex-column m-auto py-3">
-                <span class="lead">Total Expense</span>
-                <h1 class="display-6 fw-bold">@ViewBag.TotalExpense</h1>
+                <span class="lead">Your Projects</span>
+                <h1 class="display-6 fw-bold">@ViewBag.TotalProjectbyUser</h1>
             </div>
         </div>
     </div>
@@ -38,11 +38,12 @@
                 <i class="fa-solid fa-dollar-sign fa-2xl"></i>
             </div>
             <div class="d-flex flex-column m-auto py-3">
-                <span class="lead">Balance</span>
-                <h1 class="display-6 fw-bold">@ViewBag.Balance</h1>
+                <span class="lead">Date</span>
+                <h3 class="fw-bold">@DateTime.Now.ToString("MMMM d, yyyy")</h3>
             </div>
         </div>
     </div>
+
 </div>
 
 @*Doughnut and Spline Chart*@
@@ -50,15 +51,15 @@
     <div class="col-md-4">
         <div class="widget chart">
             <div class="p-4">
-                <h5 class="fw-bold">Expense By Category</h5>
+                <h5 class="fw-bold">Today's Bids Per User</h5>
             </div>
             <ejs-accumulationchart id="doughnutchart" enableSmartLabels background="#1a222b">
                 <e-accumulation-series-collection>
                     <e-accumulation-series dataSource="@ViewBag.DoughnutChartData"
-                                           xName="categoryTitleWithIcon" yName="amount"
-                                           innerRadius="60%" legendShape="Circle" 
+                                           xName="userName" yName="bidCount"
+                                           innerRadius="60%" legendShape="Circle"
                                            palettes=@(new string[]{"#0e8d76","#a4b219","#cb9b00","#8a442c","#0454b5","#7d0a0a","#822690","#4c2090","#313e93","#0096ac"})>
-                        <e-accumulationseries-datalabel name="formattedAmount" visible></e-accumulationseries-datalabel>
+                        <e-accumulationseries-datalabel name="formattedBidCount" visible></e-accumulationseries-datalabel>
                     </e-accumulation-series>
                 </e-accumulation-series-collection>
                 <e-accumulationchart-legendsettings position="Top" toggleVisibility="false">
@@ -68,10 +69,11 @@
             </ejs-accumulationchart>
         </div>
     </div>
+
     <div class="col-md-8">
         <div class="widget chart">
             <div class="p-4">
-                <h5 class="fw-bold">Income vs Expense</h5>
+                <h5 class="fw-bold">Bids vs Projects</h5>
             </div>
             <ejs-chart id="spline-chart" background="#1a222b"
                        palettes=@(new string[]{"#54ffa9","#ffe91a"})>
@@ -88,10 +90,10 @@
                     <e-chartarea-border width="0"></e-chartarea-border>
                 </e-chart-chartarea>
                 <e-series-collection>
-                    <e-series dataSource="@ViewBag.SplineChartData" xName="day" width="3"
-                              yName="income" name="Income" type="@Syncfusion.EJ2.Charts.ChartSeriesType.Spline"></e-series>
-                    <e-series dataSource="@ViewBag.SplineChartData" xName="day" width="3"
-                              yName="expense" name="Expense" type="@Syncfusion.EJ2.Charts.ChartSeriesType.Spline"></e-series>
+                    <e-series dataSource="@ViewBag.SplineChartData" xName="User" width="3"
+                              yName="Bids" name="Bids" type="@Syncfusion.EJ2.Charts.ChartSeriesType.Line"></e-series>
+                    <e-series dataSource="@ViewBag.SplineChartData" xName="User" width="3"
+                              yName="Projects" name="Projects" type="@Syncfusion.EJ2.Charts.ChartSeriesType.Line"></e-series>
                 </e-series-collection>
                 <e-chart-legendsettings position="Top" alignment="Far" toggleVisibility="false">
                     <e-legendsettings-textstyle color="#fff" size="1rem"></e-legendsettings-textstyle>
@@ -103,28 +105,24 @@
 </div>
 
 @*Recent Transactions and More*@
-<div class="row">
-    <div class="col-md-6">
+<div>
+    <div>
         <div class="widget">
             <div class="p-4">
-                <h5 class="fw-bold">Recent Transactions</h5>
+                <h5 class="fw-bold">Recent Projects</h5> <!-- Updated title -->
+                
             </div>
             <div class="px-4 pb-4">
-                <ejs-grid id="recent-transactions"
-                dataSource="@ViewBag.RecentTransactions" gridLines="None">
+                <ejs-grid id="recent-projects"
+                          dataSource="@ViewBag.RecentProjects"
+                          gridLines="None">
                     <e-grid-columns>
-                        <e-grid-column headerText="Category" field="CategoryTitleWithIcon"></e-grid-column>
-                        <e-grid-column headerText="Date" field="Date" type="date" format="MMM-dd-yy"></e-grid-column>
-                        <e-grid-column headerText="Amount" field="FormattedAmount" textAlign="Right"></e-grid-column>
+                        <e-grid-column headerText="Project Title" field="Name"></e-grid-column> <!-- Assuming Title is a property in Project -->
+                        <e-grid-column headerText="Bid Date" field="Bid.DateTime" type="date" format="MMM-dd-yy"></e-grid-column> <!-- DateTime of Bid -->
+                        <e-grid-column headerText="Account Name" field="Bid.Account.Name"></e-grid-column> <!-- Account Name within Bid -->
+                        <e-grid-column headerText="Bid By" field="Bid.User.FirstName"></e-grid-column> <!-- User FirstName within Bid -->
                     </e-grid-columns>
                 </ejs-grid>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="widget h-100">
-            <div class="d-flex justify-content-center align-items-center h-100">
-                <span><i class="fa-solid fa-plus fa-2xl"></i> Widget</span>
             </div>
         </div>
     </div>

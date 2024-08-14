@@ -9,8 +9,12 @@ namespace Expense_Tracker_WebApp.Data
     {
         public DbSet<Bid> Bids { get; set; }
         public DbSet<Account> Accounts { get; set; }
+        public DbSet<Project> Projects { get; set; }
+
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<Category> Categories { get; set; }
+
+        
         public ApplicationDbContext(DbContextOptions options)
              : base(options)
         {

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using Expense_Tracker_WebApp.Data;
+using Microsoft.AspNetCore.Identity;
 
 namespace Expense_Tracker.Controllers
 {
@@ -12,104 +13,107 @@ namespace Expense_Tracker.Controllers
     {
 
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<User> _userManager;
 
-        public DashboardController(ApplicationDbContext context)
+        public DashboardController(ApplicationDbContext context, UserManager<User> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         public async Task<ActionResult> Index()
         {
             //Last 7 Days
-            DateTime StartDate = DateTime.Today.AddDays(-6);
-            DateTime EndDate = DateTime.Today;
 
-            List<Transaction> SelectedTransactions = await _context.Transactions
-                .Include(x => x.Category)
-                .Where(y => y.Date >= StartDate && y.Date <= EndDate)
-                .ToListAsync();
+            
 
             int TotalTodayBid = await _context.Bids
-                .CountAsync(b => b.DateTime.Date == DateTime.Today);
+                .CountAsync(b => b.DateTime.Date == DateTime.Today && b.UserId == _userManager.GetUserId(User));
             ViewBag.TotalTodayBid = TotalTodayBid.ToString();
 
-            //Total Income
-            int TotalIncome = SelectedTransactions
-                .Where(i => i.Category.Type == "Income")
-                .Sum(j => j.Amount);
-            ViewBag.TotalIncome = TotalIncome.ToString("C0");
+            int TotalProjectbyUser = await _context.Projects
+                .CountAsync(p => p.Bid.UserId == _userManager.GetUserId(User));
+            ViewBag.TotalProjectbyUser = TotalProjectbyUser.ToString();
 
-            //Total Expense
-            int TotalExpense = SelectedTransactions
-                .Where(i => i.Category.Type == "Expense")
-                .Sum(j => j.Amount);
-            ViewBag.TotalExpense = TotalExpense.ToString("C0");
-
-            //Balance
-            int Balance = TotalIncome - TotalExpense;
-            CultureInfo culture = CultureInfo.CreateSpecificCulture("en-US");
-            culture.NumberFormat.CurrencyNegativePattern = 1;
-            ViewBag.Balance = String.Format(culture, "{0:C0}", Balance);
-
-            //Doughnut Chart - Expense By Category
-            ViewBag.DoughnutChartData = SelectedTransactions
-                .Where(i => i.Category.Type == "Expense")
-                .GroupBy(j => j.Category.CategoryId)
-                .Select(k => new
+            // Total Bids per User for Today
+            ViewBag.DoughnutChartData = await _context.Bids
+                .Where(b => b.DateTime.Date == DateTime.Today)
+                .GroupBy(b => b.User.FirstName)
+                .Select(group => new
                 {
-                    categoryTitleWithIcon = k.First().Category.Icon + " " + k.First().Category.Title,
-                    amount = k.Sum(j => j.Amount),
-                    formattedAmount = k.Sum(j => j.Amount).ToString("C0"),
+                    userName = group.Key,
+                    bidCount = group.Count(),
+                    formattedBidCount = group.Count().ToString()
                 })
-                .OrderByDescending(l => l.amount)
-                .ToList();
-
-            //Spline Chart - Income vs Expense
-
-            //Income
-            List<SplineChartData> IncomeSummary = SelectedTransactions
-                .Where(i => i.Category.Type == "Income")
-                .GroupBy(j => j.Date)
-                .Select(k => new SplineChartData()
-                {
-                    day = k.First().Date.ToString("dd-MMM"),
-                    income = k.Sum(l => l.Amount)
-                })
-                .ToList();
-
-            //Expense
-            List<SplineChartData> ExpenseSummary = SelectedTransactions
-                .Where(i => i.Category.Type == "Expense")
-                .GroupBy(j => j.Date)
-                .Select(k => new SplineChartData()
-                {
-                    day = k.First().Date.ToString("dd-MMM"),
-                    expense = k.Sum(l => l.Amount)
-                })
-                .ToList();
-
-            //Combine Income & Expense
-            string[] Last7Days = Enumerable.Range(0, 7)
-                .Select(i => StartDate.AddDays(i).ToString("dd-MMM"))
-                .ToArray();
-
-            ViewBag.SplineChartData = from day in Last7Days
-                                      join income in IncomeSummary on day equals income.day into dayIncomeJoined
-                                      from income in dayIncomeJoined.DefaultIfEmpty()
-                                      join expense in ExpenseSummary on day equals expense.day into expenseJoined
-                                      from expense in expenseJoined.DefaultIfEmpty()
-                                      select new
-                                      {
-                                          day = day,
-                                          income = income == null ? 0 : income.income,
-                                          expense = expense == null ? 0 : expense.expense,
-                                      };
-            //Recent Transactions
-            ViewBag.RecentTransactions = await _context.Transactions
-                .Include(i => i.Category)
-                .OrderByDescending(j => j.Date)
-                .Take(5)
+                .OrderByDescending(x => x.bidCount)
                 .ToListAsync();
+
+
+            // Fetch all bids and projects with associated users
+            var selectedBids = _context.Bids
+                .Include(b => b.User) // Include User data
+                .ToList();
+
+            var selectedProjects = _context.Projects
+                .Include(p => p.Bid) // Include Bid data
+                .ThenInclude(b => b.User) // Include User data via Bid
+                .ToList();
+
+            // Aggregate bids by user
+            var bidsSummary = selectedBids
+                .GroupBy(b => b.User.FirstName) // Aggregate by user
+                .Select(g => new
+                {
+                    Username = g.Key,
+                    Bids = g.Count()
+                })
+                .ToList();
+
+            // Aggregate projects by user
+            var projectsSummary = selectedProjects
+                .GroupBy(p => p.Bid.User.FirstName) // Aggregate by user via Bid
+                .Select(g => new
+                {
+                    Username = g.Key,
+                    Projects = g.Count()
+                })
+                .ToList();
+
+            // Combine Bids & Projects
+            var userList = bidsSummary
+                .Select(b => b.Username)
+                .Union(projectsSummary.Select(p => p.Username))
+                .ToList();
+
+            var combinedData = from user in userList
+                               join bid in bidsSummary on user equals bid.Username into bidJoin
+                               from bid in bidJoin.DefaultIfEmpty()
+                               join project in projectsSummary on user equals project.Username into projectJoin
+                               from project in projectJoin.DefaultIfEmpty()
+                               select new
+                               {
+                                   User = user,
+                                   Bids = bid?.Bids ?? 0,
+                                   Projects = project?.Projects ?? 0
+                               };
+
+            ViewBag.SplineChartData = combinedData;
+
+
+
+
+
+            // Fetch recent projects with related entities
+            ViewBag.RecentProjects = await _context.Projects
+                .Include(p => p.Bid) // Include the Bid information
+                    .ThenInclude(b => b.Account) // Include the Account information within Bid
+                .Include(p => p.Bid) // Include Bid again to access User information
+                    .ThenInclude(b => b.User) // Include the User information within Bid
+                .OrderByDescending(p => p.Bid.DateTime) // Sort by the Bid's DateTime property
+                .Take(5) // Get the top 5 recent projects
+                .ToListAsync();
+
+
 
 
             return View();
@@ -118,9 +122,9 @@ namespace Expense_Tracker.Controllers
 
     public class SplineChartData
     {
-        public string day;
-        public int income;
-        public int expense;
-
+        public string day { get; set; }
+        public int bids { get; set; }
+        public int projects { get; set; }
     }
+
 }
