@@ -13,28 +13,28 @@
     {
         text = "Dashboard",
         url = "/",
-        iconCss = "fa-solid fa-box",
+        iconCss = "fa-sharp-duotone fa-solid fa-table-columns",
     });
 
     menuItems.Add(new
     {
         text = "Accounts",
-        iconCss = "fa-light fa-file-invoice-dollar",
-        url = "/Accounts"
+        url = "/Accounts",
+        iconCss = "fa-sharp-duotone fa-solid fa-file-invoice-dollar",
     });
 
     menuItems.Add(new
     {
         text = "Start Bidding",
         url = "/Bids",
-        iconCss = "fa-light fa-ring",
+        iconCss = "fa-sharp-duotone fa-solid fa-file-contract",
     });
 
     menuItems.Add(new
     {
         text = "Projects",
-        iconCss = "fa-solid fa-arrow-right-arrow-left",
-        url = "/Projects"
+        url = "/Projects",
+        iconCss = "fa-sharp-duotone fa-solid fa-diagram-project",
     });
 
     menuItems.Add(new
@@ -44,15 +44,10 @@
     });
     menuItems.Add(new
     {
-        text = "Reports",
-        iconCss = "fa-solid fa-chart-simple",
-        url = "#"
-    }); menuItems.Add(new
-    {
-        text = "Settings",
-        iconCss = "fa-solid fa-gear",
-        url = "#"
-    });
+        text = "Logout",
+        url = "/Identity/Account/Logout",
+        iconCss = "fa-sharp-duotone fa-solid fa-right-from-bracket",
+    }); 
 }
 
 
