@@ -4,6 +4,7 @@
 @{
     List<Object> menuItems = new List<Object>();
 
+
     menuItems.Add(new
     {
         text = "General",
@@ -42,17 +43,18 @@
         text = "Extras",
         separator = true,
     });
+
     menuItems.Add(new
     {
         text = "Logout",
         url = "/Identity/Account/Logout",
         iconCss = "fa-sharp-duotone fa-solid fa-right-from-bracket",
-    }); 
+    });
 }
 
 
 <ejs-sidebar id="sidebar" width="290px" enableDock dockSize="100px"
-            target=".dock-target" enableGestures="false">
+             target=".dock-target" enableGestures="false">
     <e-content-template>
 
         <div class="logo-wrapper">
@@ -64,12 +66,19 @@
         </div>
 
         <div class="profile-wrapper">
-            <img class="profile-pic" src="~/profile.jpg" />
+            <div class="profile-pic-initials">
+                @{
+                    var firstName = User.FindFirst("FirstName")?.Value;
+                    var lastName = User.FindFirst("LastName")?.Value;
+                    var initials = $"{firstName?.FirstOrDefault()}{lastName?.FirstOrDefault()}".ToUpper();
+                }
+                @initials
+            </div>
             <div class="titles d-flex flex-column ps-3">
-                <h6 class="mb-0">Your Account</h6>
-                <span class="text-muted">@User.Identity.Name</span>
+                <h6 class="mb-0">@firstName @lastName</h6>
             </div>
         </div>
+
 
         <ejs-menu id="menu"
                   items="menuItems"
@@ -78,12 +87,20 @@
     </e-content-template>
 </ejs-sidebar>
 
-<script>
-    document.addEventListener('DOMContentLoaded',function (){
-        dockBar = document.getElementById('sidebar').ej2_instances[0];
-        document.getElementById('sidebar-toggler').onclick = function () {
-            dockBar.toggle();
-        };
-    });
+<!-- Custom CSS -->
+<style>
+    .profile-pic-initials {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: #6cabdb; /* You can change this color as needed */
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px; /* Adjust font size as needed */
+        font-weight: bold;
+        text-transform: uppercase;
+    }
 
-</script>
+</style>

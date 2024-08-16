@@ -53,53 +53,16 @@
             <div class="p-4">
                 <h5 class="fw-bold">Today's Bids Per User</h5>
             </div>
-            <ejs-accumulationchart id="doughnutchart" enableSmartLabels background="#1a222b">
-                <e-accumulation-series-collection>
-                    <e-accumulation-series dataSource="@ViewBag.DoughnutChartData"
-                                           xName="userName" yName="bidCount"
-                                           innerRadius="60%" legendShape="Circle"
-                                           palettes=@(new string[]{"#0e8d76","#a4b219","#cb9b00","#8a442c","#0454b5","#7d0a0a","#822690","#4c2090","#313e93","#0096ac"})>
-                        <e-accumulationseries-datalabel name="formattedBidCount" visible></e-accumulationseries-datalabel>
-                    </e-accumulation-series>
-                </e-accumulation-series-collection>
-                <e-accumulationchart-legendsettings position="Top" toggleVisibility="false">
-                    <e-legendsettings-textstyle color="#fff" size="1rem"></e-legendsettings-textstyle>
-                </e-accumulationchart-legendsettings>
-                <e-accumulationchart-tooltipsettings enable></e-accumulationchart-tooltipsettings>
-            </ejs-accumulationchart>
+            <canvas id="doughnutChart" class="mb-18"></canvas>
         </div>
     </div>
 
     <div class="col-md-8">
         <div class="widget chart">
-            <div class="p-4">
+            <div class="p-4 p-lg-4">
                 <h5 class="fw-bold">Bids vs Projects</h5>
             </div>
-            <ejs-chart id="spline-chart" background="#1a222b"
-                       palettes=@(new string[]{"#54ffa9","#ffe91a"})>
-                <e-chart-primaryxaxis valueType="Category">
-                    <e-majorgridlines width="0"></e-majorgridlines>
-                    <e-majorticklines width="0"></e-majorticklines>
-                </e-chart-primaryxaxis>
-                <e-chart-primaryyaxis>
-                    <e-majorgridlines width="1" color="#32414d" dashArray="3,5"></e-majorgridlines>
-                    <e-majorticklines width="0"></e-majorticklines>
-                    <e-linestyle width="0"></e-linestyle>
-                </e-chart-primaryyaxis>
-                <e-chart-chartarea>
-                    <e-chartarea-border width="0"></e-chartarea-border>
-                </e-chart-chartarea>
-                <e-series-collection>
-                    <e-series dataSource="@ViewBag.SplineChartData" xName="User" width="3"
-                              yName="Bids" name="Bids" type="@Syncfusion.EJ2.Charts.ChartSeriesType.Line"></e-series>
-                    <e-series dataSource="@ViewBag.SplineChartData" xName="User" width="3"
-                              yName="Projects" name="Projects" type="@Syncfusion.EJ2.Charts.ChartSeriesType.Line"></e-series>
-                </e-series-collection>
-                <e-chart-legendsettings position="Top" alignment="Far" toggleVisibility="false">
-                    <e-legendsettings-textstyle color="#fff" size="1rem"></e-legendsettings-textstyle>
-                </e-chart-legendsettings>
-                <e-chart-tooltipsettings enable shared></e-chart-tooltipsettings>
-            </ejs-chart>
+            <canvas id="splineChart"></canvas>
         </div>
     </div>
 </div>
@@ -127,3 +90,130 @@
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+<script>
+    var ctx = document.getElementById('doughnutChart').getContext('2d');
+    var doughnutChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: @Html.Raw(ViewBag.DoughnutChartLabels),
+            datasets: [{
+                data: @Html.Raw(ViewBag.DoughnutChartData),
+                backgroundColor: ["#6cabdb", "#edf9fb", "#a5c9e6", "#b2dff9", "#6ab2ec", "#ffffff", "#0466c8", "#2196f3", "#1e88e5", "#1565c0"],
+                borderColor: "#1a222b",
+                borderWidth: 1,
+                hoverOffset: 18 // Creates a hover effect to give a sense of depth
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        color: '#fff'
+                    }
+                },
+                tooltip: {
+                    enabled: true
+                },
+                datalabels: {
+                    color: '#fff',
+                    font: {
+                        weight: 'bold',
+                        size: 16
+                    },
+                    formatter: (value, context) => {
+                        return value; // Display the bid count inside the chart
+                    }
+                }
+            }
+        },
+        plugins: [{
+            beforeDraw: function (chart) {
+                var ctx = chart.ctx;
+                ctx.save();
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+                ctx.shadowBlur = 20;
+                ctx.shadowOffsetX = 5;
+                ctx.shadowOffsetY = 5;
+                ctx.restore();
+            }
+        }]
+    });
+</script>
+
+<script>
+    var ctx = document.getElementById('splineChart').getContext('2d');
+    var splineChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: @Html.Raw(ViewBag.Users), // X-axis: Usernames
+            datasets: [
+                {
+                    label: 'Bids',
+                    data: @Html.Raw(ViewBag.Bids), // Y-axis: Bids
+                    borderColor: '#5aa9e6',
+                    backgroundColor: 'rgba(84, 255, 169, 0.2)',
+                    fill: false,
+                    tension: 0.4 // Smooth curves
+                },
+                {
+                    label: 'Projects',
+                    data: @Html.Raw(ViewBag.Projects), // Y-axis: Projects
+                    borderColor: '#ffffff',
+                    backgroundColor: 'rgba(255, 233, 26, 0.2)',
+                    fill: false,
+                    tension: 0.4 // Smooth curves
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: {
+                    grid: {
+                        display: false // Hide grid lines on X-axis
+                    },
+                    ticks: {
+                        color: '#fff', // White color for X-axis labels
+                        padding: 10,  // Add padding to X-axis labels
+                        align: 'center', // Center-align the labels
+                        maxRotation: 0, // Prevent label rotation
+                        autoSkip: false, // Prevent auto-skipping of labels
+                        crossAlign: 'center',
+                    },
+                    offset: true, // Add an offset to center the first and last labels
+                },
+                y: {
+                    grid: {
+                        color: '#32414d', // Dark grid lines on Y-axis
+                        borderDash: [3, 5] // Dashed grid lines
+                    },
+                    ticks: {
+                        color: '#fff' // White color for Y-axis labels
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        color: '#fff' // White color for legend
+                    }
+                },
+                tooltip: {
+                    enabled: true
+                }
+            },
+            elements: {
+                line: {
+                    borderWidth: 3 // Thicker line width
+                }
+            }
+        }
+    });
+</script>

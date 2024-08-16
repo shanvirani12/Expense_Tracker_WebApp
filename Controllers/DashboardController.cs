@@ -36,17 +36,21 @@ namespace Expense_Tracker.Controllers
             ViewBag.TotalProjectbyUser = TotalProjectbyUser.ToString();
 
             // Total Bids per User for Today
-            ViewBag.DoughnutChartData = await _context.Bids
-                .Where(b => b.DateTime.Date == DateTime.Today)
-                .GroupBy(b => b.User.FirstName)
-                .Select(group => new
-                {
-                    userName = group.Key,
-                    bidCount = group.Count(),
-                    formattedBidCount = group.Count().ToString()
-                })
-                .OrderByDescending(x => x.bidCount)
-                .ToListAsync();
+            var doughnutChartData = await _context.Bids
+            .Where(b => b.DateTime.Date == DateTime.Today)
+            .GroupBy(b => new { b.User.FirstName, b.User.LastName })
+            .Select(group => new
+            {
+                UserName = $"{group.Key.FirstName} {group.Key.LastName}",
+                BidCount = group.Count()
+            })
+            .OrderByDescending(x => x.BidCount)
+            .ToListAsync();
+
+            // Serialize data to JSON
+            ViewBag.DoughnutChartLabels = Newtonsoft.Json.JsonConvert.SerializeObject(doughnutChartData.Select(d => d.UserName).ToList());
+            ViewBag.DoughnutChartData = Newtonsoft.Json.JsonConvert.SerializeObject(doughnutChartData.Select(d => d.BidCount).ToList());
+
 
 
             // Fetch all bids and projects with associated users
@@ -97,7 +101,10 @@ namespace Expense_Tracker.Controllers
                                    Projects = project?.Projects ?? 0
                                };
 
-            ViewBag.SplineChartData = combinedData;
+            ViewBag.Users = Newtonsoft.Json.JsonConvert.SerializeObject(combinedData.Select(d => d.User).ToList());
+            ViewBag.Bids = Newtonsoft.Json.JsonConvert.SerializeObject(combinedData.Select(d => d.Bids).ToList());
+            ViewBag.Projects = Newtonsoft.Json.JsonConvert.SerializeObject(combinedData.Select(d => d.Projects).ToList());
+
 
 
 
