@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "identityapp1": {
+      "connectionInfo": "App registration: Lusiontech, Tenant: Default Directory (shanvirani4321gmail.onmicrosoft.com - Microsoft Entra ID)",
+      "type": "identityapp.default"
+    },
+    "mssql1": {
+      "serviceConnectorResourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Web/sites/Lusiontech/providers/Microsoft.ServiceLinker/linkers/ConnectionStringsOfficeConnection_F1BEFDFF0C",
+      "secretStore": "AzureAppSettings",
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Sql/servers/lusiontechmanagementserver/databases/Lusiontech_Bid_Management_db",
+      "type": "mssql.azure",
+      "connectionId": "ConnectionStrings:OfficeConnection"
+    }
+  }
+}

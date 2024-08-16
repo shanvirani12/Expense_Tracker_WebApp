@@ -23,10 +23,12 @@ namespace Expense_Tracker_WebApp.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<User> _signInManager;
         private readonly ILogger<LoginModel> _logger;
+        private readonly UserManager<User> _userManager;
 
-        public LoginModel(SignInManager<User> signInManager, ILogger<LoginModel> logger)
+        public LoginModel(SignInManager<User> signInManager, UserManager<User> userManager, ILogger<LoginModel> logger)
         {
             _signInManager = signInManager;
+            _userManager = userManager;
             _logger = logger;
         }
 
@@ -111,50 +113,54 @@ namespace Expense_Tracker_WebApp.Areas.Identity.Pages.Account
 
             if (ModelState.IsValid)
             {
-                var user = await _signInManager.UserManager.FindByEmailAsync(Input.Email);
-
-                if (user != null)
+                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                if (result.Succeeded)
                 {
-                    // Ensure the user's first and last names are added as claims
+                    _logger.LogInformation("User logged in.");
+
+                    // Retrieve the user to add claims
+                    var user = await _userManager.FindByNameAsync(Input.Email);
+
+
+                    if (user == null)
+                    {
+                        _logger.LogError($"User with email {Input.Email} not found.");
+                        ModelState.AddModelError(string.Empty, "User not found.");
+                        return Page();
+                    }
+
+                    // Add claims for first name and last name
                     var claims = new List<Claim>
             {
                 new Claim("FirstName", user.FirstName ?? string.Empty),
                 new Claim("LastName", user.LastName ?? string.Empty)
             };
 
-                    await _signInManager.SignOutAsync(); // Ensure no other identities are signed in
-
-                    // Sign in the user with additional claims
-                    var result = await _signInManager.PasswordSignInAsync(user, Input.Password, Input.RememberMe, lockoutOnFailure: false);
-
-                    if (result.Succeeded)
+                    var addClaimsResult = await _signInManager.UserManager.AddClaimsAsync(user, claims);
+                    if (!addClaimsResult.Succeeded)
                     {
-                        var identity = new ClaimsIdentity(claims, IdentityConstants.ApplicationScheme);
-                        await HttpContext.SignInAsync(IdentityConstants.ApplicationScheme, new ClaimsPrincipal(identity));
-
-                        _logger.LogInformation("User logged in.");
-                        return LocalRedirect(returnUrl);
-                    }
-                    if (result.RequiresTwoFactor)
-                    {
-                        return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
-                    }
-                    if (result.IsLockedOut)
-                    {
-                        _logger.LogWarning("User account locked out.");
-                        return RedirectToPage("./Lockout");
-                    }
-                    else
-                    {
-                        ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                        _logger.LogError("Failed to add claims.");
+                        ModelState.AddModelError(string.Empty, "Failed to add claims.");
                         return Page();
                     }
+
+                    // Log claims for debugging
+                    var userClaims = await _signInManager.UserManager.GetClaimsAsync(user);
+                    foreach (var claim in userClaims)
+                    {
+                        _logger.LogInformation($"Claim Type: {claim.Type}, Claim Value: {claim.Value}");
+                    }
+
+                    return LocalRedirect(returnUrl);
                 }
+                // Other cases omitted for brevity
             }
 
             // If we got this far, something failed, redisplay form
             return Page();
         }
+
+
 
     }
 }
