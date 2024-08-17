@@ -171,12 +171,24 @@ namespace Expense_Tracker_WebApp.Areas.Identity.Pages.Account
 
                     return LocalRedirect(returnUrl);
                 }
-                // Other cases omitted for brevity
+                else if (result.IsLockedOut)
+                {
+                    _logger.LogWarning("User account locked out.");
+                    ModelState.AddModelError(string.Empty, "User account locked out.");
+                    return Page();
+                }
+                else
+                {
+                    _logger.LogWarning("Invalid login attempt.");
+                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    return Page();
+                }
             }
 
             // If we got this far, something failed, redisplay form
             return Page();
         }
+
 
 
 
