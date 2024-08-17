@@ -48,17 +48,27 @@
 
 @*Doughnut and Spline Chart*@
 <div class="row mb-4">
-    <div class="col-md-4">
-        <div class="widget chart">
+    <div class="col-md-4 d-flex align-items-stretch">
+        <div class="widget chart flex-fill">
             <div class="p-4">
                 <h5 class="fw-bold">Today's Bids Per User</h5>
             </div>
-            <canvas id="doughnutChart" class="mb-18"></canvas>
+
+            @if (ViewBag.AllBidsZero)
+            {
+                <div class="no-bids-message">
+                    No bids have been made up till now
+                </div>
+            }
+            else
+            {
+                <canvas id="doughnutChart" class="mb-18"></canvas>
+            }
         </div>
     </div>
 
-    <div class="col-md-8">
-        <div class="widget chart">
+    <div class="col-md-8 d-flex align-items-stretch">
+        <div class="widget chart flex-fill">
             <div class="p-4 p-lg-4">
                 <h5 class="fw-bold">Bids vs Projects</h5>
             </div>
@@ -66,6 +76,7 @@
         </div>
     </div>
 </div>
+
 
 @*Recent Transactions and More*@
 <div>
