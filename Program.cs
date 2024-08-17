@@ -29,13 +29,13 @@ builder.Services.AddAuthorizationBuilder();
 
 //DI
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-options.UseSqlServer(builder.Configuration.GetConnectionString("HomeConnection")));
+options.UseSqlServer(builder.Configuration.GetConnectionString("OfficeConnection")));
 
 
 //Register Syncfusion license
 Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Mgo+DSMBMAY9C3t2U1hhQlJBfVZdWnxLflFyVWJYdVx0flRHcDwsT3RfQFljQX5bdEZhX35acnFcQA==");
 
-builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();

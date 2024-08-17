@@ -121,7 +121,6 @@ namespace Expense_Tracker_WebApp.Areas.Identity.Pages.Account
                     // Retrieve the user to add claims
                     var user = await _userManager.FindByNameAsync(Input.Email);
 
-
                     if (user == null)
                     {
                         _logger.LogError($"User with email {Input.Email} not found.");
@@ -129,14 +128,29 @@ namespace Expense_Tracker_WebApp.Areas.Identity.Pages.Account
                         return Page();
                     }
 
-                    // Add claims for first name and last name
+                    // Remove existing claims for FirstName and LastName
+                    var existingClaims = await _userManager.GetClaimsAsync(user);
+                    var firstNameClaim = existingClaims.FirstOrDefault(c => c.Type == "FirstName");
+                    var lastNameClaim = existingClaims.FirstOrDefault(c => c.Type == "LastName");
+
+                    if (firstNameClaim != null)
+                    {
+                        await _userManager.RemoveClaimAsync(user, firstNameClaim);
+                    }
+
+                    if (lastNameClaim != null)
+                    {
+                        await _userManager.RemoveClaimAsync(user, lastNameClaim);
+                    }
+
+                    // Add updated claims
                     var claims = new List<Claim>
             {
                 new Claim("FirstName", user.FirstName ?? string.Empty),
                 new Claim("LastName", user.LastName ?? string.Empty)
             };
 
-                    var addClaimsResult = await _signInManager.UserManager.AddClaimsAsync(user, claims);
+                    var addClaimsResult = await _userManager.AddClaimsAsync(user, claims);
                     if (!addClaimsResult.Succeeded)
                     {
                         _logger.LogError("Failed to add claims.");
@@ -144,8 +158,12 @@ namespace Expense_Tracker_WebApp.Areas.Identity.Pages.Account
                         return Page();
                     }
 
+                    // Refresh authentication
+                    await _signInManager.SignOutAsync();
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+
                     // Log claims for debugging
-                    var userClaims = await _signInManager.UserManager.GetClaimsAsync(user);
+                    var userClaims = await _userManager.GetClaimsAsync(user);
                     foreach (var claim in userClaims)
                     {
                         _logger.LogInformation($"Claim Type: {claim.Type}, Claim Value: {claim.Value}");
@@ -159,6 +177,7 @@ namespace Expense_Tracker_WebApp.Areas.Identity.Pages.Account
             // If we got this far, something failed, redisplay form
             return Page();
         }
+
 
 
 
