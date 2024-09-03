@@ -346,44 +346,6 @@ img.profile-pic {
         color: #2aa1ff;
     }
 
-/* Ensure that the .row has full width */
-.row {
-    width: 100%;
-}
-
-/* Flexbox to make sure columns have the same height */
-.d-flex {
-    display: flex;
-}
-
-.align-items-stretch {
-    align-items: stretch;
-}
-
-.widget.chart {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    overflow: hidden; /* Optional: Ensure content fits within the widget */
-}
-
-    .widget.chart .p-4 {
-        flex-shrink: 0; /* Prevent header from shrinking */
+    .widget.chart {
+        padding: 5px;
     }
-
-    .widget.chart canvas {
-        flex: 1; /* Allow canvas to expand and fill remaining space */
-        width: 100% !important; /* Ensure canvas fits the container */
-        padding-bottom: 20px;
-        padding-left: 20px;
-        padding-right:20px
-    }
-.no-bids-message {
-    display: flex;
-    justify-content: center; /* Horizontally center */
-    align-items: center; /* Vertically center */
-    height: 100%; /* Ensure it takes up full height */
-    text-align: center; /* Center text within the container */
-    color: #6cabdb; /* Optional: Text color */
-    border-radius: .375rem; /* Optional: Border radius */
-}
