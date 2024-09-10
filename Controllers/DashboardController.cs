@@ -25,7 +25,7 @@ namespace Expense_Tracker.Controllers
         {
             //Last 7 Days
 
-            
+
 
             int TotalTodayBid = await _context.Bids
                 .CountAsync(b => b.DateTime.Date == DateTime.Today && b.UserId == _userManager.GetUserId(User));
@@ -46,6 +46,10 @@ namespace Expense_Tracker.Controllers
             })
             .OrderByDescending(x => x.BidCount)
             .ToListAsync();
+
+            // Check if all bids are zero
+            bool allBidsZero = doughnutChartData.All(data => data.BidCount == 0);
+            ViewBag.AllBidsZero = allBidsZero;
 
             // Serialize data to JSON
             ViewBag.DoughnutChartLabels = Newtonsoft.Json.JsonConvert.SerializeObject(doughnutChartData.Select(d => d.UserName).ToList());

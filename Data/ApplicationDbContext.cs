@@ -10,8 +10,8 @@ namespace Expense_Tracker_WebApp.Data
         public DbSet<Bid> Bids { get; set; }
         public DbSet<Account> Accounts { get; set; }
         public DbSet<Project> Projects { get; set; }
-
-        
+        public DbSet<Projects> Projacts { get; set; }
+        public DbSet<Currency> Currencies { get; set; }
         public ApplicationDbContext(DbContextOptions options)
              : base(options)
         {

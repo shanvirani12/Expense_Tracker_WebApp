@@ -1,0 +1,49 @@
+﻿@model IEnumerable<Expense_Tracker_WebApp.Models.Currency>
+@{
+    ViewData["Title"] = "Currency Management";
+}
+
+<div class="container mt-4">
+    <h2>Currency Management</h2>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Error"]
+        </div>
+    }
+
+    <h3>Available Currencies</h3>
+    <form asp-action="AddCurrency" method="post">
+        <div class="form-group">
+            <label for="currencyCode">Currency Code (e.g., USD, EUR):</label>
+            <input type="text" id="currencyCode" name="currencyCode" class="form-control" maxlength="3" />
+            <button type="submit" class="btn btn-primary mt-2">Add Currency</button>
+        </div>
+    </form>
+
+    <h3 class="mt-4">Existing Currencies</h3>
+    <table class="table table-dark">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Exchange Rate to PKR</th>
+                <th>Last Updated</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var currency in Model)
+            {
+                <tr>
+                    <td>@currency.Code</td>
+                    <td>@currency.ExchangeRate</td>
+                    <td>@currency.LastUpdated</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <form asp-action="UpdateRates" method="post">
+        <button type="submit" class="btn btn-secondary mt-4">Update All Rates</button>
+    </form>
+</div>
