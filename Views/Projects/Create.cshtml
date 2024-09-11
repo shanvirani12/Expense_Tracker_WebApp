@@ -1,79 +1,166 @@
-﻿@model Expense_Tracker_WebApp.Models.Project
-
+﻿@model Expense_Tracker_WebApp.Models.Projects
 @{
-    ViewData["Title"] = Model.ProjectId == 0 ? "Create a new project" : "Edit project";
+    ViewData["Title"] = "Create Project";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="row">
-    <div class="col-md-7">
-        <div class="widget p-5" style="background-color:#212b36">
-            <form asp-action="Create" method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <input type="hidden" name="Id" value="@Model.ProjectId" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.1.3/darkly/bootstrap.min.css" rel="stylesheet" />
 
-                <div class="mb-3">
-                    <ejs-textbox id="Name" placeholder="Project Name" ejs-for="Name" floatLabelType="Always"></ejs-textbox>
-                    <span asp-validation-for="Name" class="text-danger fs-6"></span>
-                </div>
+<h2>Create Project</h2>
 
-                <div class="mb-3">
-                    <ejs-textbox id="bidSearch" placeholder="Search Bid by Link" floatLabelType="Always"></ejs-textbox>
-                    <ejs-button id="searchBtn" content="Search" type="button" cssClass="e-info" onclick="searchBids()"></ejs-button>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="BidId" class="form-label text-white">Select Bid</label>
-                    <select id="bidSelect" asp-for="BidId" class="form-select">
-                        <option value="">Select a bid</option>
-                    </select>
-                    <span asp-validation-for="BidId" class="text-danger fs-6"></span>
-                </div>
-
-                <ejs-button id="submit" type="submit" content="Submit" cssClass="e-success"></ejs-button>
-            </form>
-        </div>
+<form asp-action="Create" method="post">
+    <div class="form-group">
+        <label asp-for="ProjectName"></label>
+        <input asp-for="ProjectName" class="form-control" />
     </div>
 
-    <div class="col-md-5">
-        <div class="widget h-100 d-flex justify-content-center align-items-center">
-            <i class="fa-solid fa-shapes fa-2xl text-white"></i>
-        </div>
+    <!-- Bid Search -->
+    <div class="mb-3">
+        <ejs-textbox id="bidSearch" placeholder="Search Bid by Link" floatLabelType="Always"></ejs-textbox>
+        <ejs-button id="searchBtn" content="Search" type="button" cssClass="e-info" onclick="searchBids()"></ejs-button>
     </div>
-</div>
+
+    <!-- Bid Selection -->
+    <div class="mb-3">
+        <label asp-for="ProjectLink" class="form-label text-white">Select Bid</label>
+        <select id="bidSelect" class="form-select">
+            <option value="">Select a bid</option>
+        </select>
+        <span asp-validation-for="ProjectLink" class="text-danger fs-6"></span>
+    </div>
+
+    <!-- Project Link -->
+    <div class="mb-3">
+        <label asp-for="ProjectLink" class="form-label text-white">Project Link</label>
+        <input type="text" id="ProjectLink" asp-for="ProjectLink" class="form-control" readonly />
+        <span asp-validation-for="ProjectLink" class="text-danger fs-6"></span>
+    </div>
+
+    <!-- Account Name -->
+    <div class="mb-3">
+        <label class="form-label text-white">Account Name</label>
+        <input type="text" id="AccountName" name="AccountName" class="form-control" readonly />
+    </div>
+
+    <!-- User -->
+    <div class="mb-3">
+        <label class="form-label text-white">User</label>
+        <input type="text" id="UserName" name="UserName" class="form-control" readonly />
+    </div>
+
+    <!-- IsRecruiter Checkbox -->
+    <div class="form-group">
+        <label asp-for="IsRecruiter"></label>
+        <input asp-for="IsRecruiter" type="checkbox" class="form-check-input" id="IsRecruiter" onclick="calculateBudget()" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="GrossBudget"></label>
+        <input asp-for="GrossBudget" id="GrossBudget" class="form-control" oninput="calculateBudget()" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="CurrencyId">Currency</label>
+        <select asp-for="CurrencyId" class="form-control" id="CurrencyId" onchange="calculateBudget()">
+            @foreach (var currency in ViewData["CurrencyId"] as SelectList)
+            {
+                <option value="@currency.Value">@currency.Text</option>
+            }
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="NetBudget"></label>
+        <input asp-for="NetBudget" id="NetBudget" class="form-control" readonly />
+    </div>
+
+    <div class="form-group">
+        <label>Budget in PKR</label>
+        <input id="BudgetInPKR" class="form-control" readonly />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="ClosingDate"></label>
+        <input asp-for="ClosingDate" class="form-control" type="date" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="AssignedTo"></label>
+        <input asp-for="AssignedTo" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="CostinPKR"></label>
+        <input asp-for="CostinPKR" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-success">Submit</button>
+</form>
 
 @section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            function searchBids() {
-                var query = document.getElementById("bidSearch").ej2_instances[0].value;
-                if (!query) {
-                    alert("Please enter a search term.");
-                    return;
-                }
-                fetch('/Projects/SearchBids?query=' + encodeURIComponent(query))
-                    .then(response => response.json())
-                    .then(data => {
-                        var select = document.getElementById('bidSelect');
-                        if (!select) {
-                            console.error('Select element not found');
-                            return;
-                        }
-                        select.innerHTML = ''; // Clear existing options
-                        var defaultOption = document.createElement("option");
-                        defaultOption.value = '';
-                        defaultOption.text = 'Select a bid';
-                        select.appendChild(defaultOption);
-                        data.forEach(function (bid) {
-                            var option = document.createElement("option");
-                            option.value = bid.id;
-                            option.text = `Link: ${bid.link}, Employee: ${bid.user}, Account: ${bid.account}`;
-                            select.appendChild(option);
-                        });
-                    })
-                    .catch(error => console.error('Error fetching bids:', error));
-            }
 
-            window.searchBids = searchBids; // Make searchBids function globally accessible
-        });
+        function searchBids() {
+            var query = document.getElementById("bidSearch").ej2_instances[0].value;
+            if (!query) {
+                alert("Please enter a search term.");
+                return;
+            }
+            fetch('/Projects/SearchBids?query=' + encodeURIComponent(query))
+                .then(response => response.json())
+                .then(data => {
+                    var select = document.getElementById('bidSelect');
+                    if (!select) {
+                        console.error('Select element not found');
+                        return;
+                    }
+                    select.innerHTML = ''; // Clear existing options
+                    var defaultOption = document.createElement("option");
+                    defaultOption.value = '';
+                    defaultOption.text = 'Select a bid';
+                    select.appendChild(defaultOption);
+                    data.forEach(function (bid) {
+                        var option = document.createElement("option");
+                        option.value = bid.id;
+                        option.text = `Link: ${bid.link}, Employee: ${bid.user}, Account: ${bid.account}`;
+                        select.appendChild(option);
+                    });
+
+                    // Event listener for when a bid is selected
+                    select.addEventListener('change', function () {
+                        var selectedBid = data.find(bid => bid.id == select.value);
+                        if (selectedBid) {
+                            document.getElementById('ProjectLink').value = selectedBid.link;
+                            document.getElementById('AccountName').value = selectedBid.account;
+                            document.getElementById('UserName').value = selectedBid.user;
+                        } else {
+                            document.getElementById('ProjectLink').value = '';
+                            document.getElementById('AccountName').value = '';
+                            document.getElementById('UserName').value = '';
+                        }
+                    });
+                })
+                .catch(error => console.error('Error fetching bids:', error));
+        }
+
+        window.searchBids = searchBids;
+
+        function calculateBudget() {
+            const grossBudget = parseFloat(document.getElementById('GrossBudget').value);
+            const currencyId = parseInt(document.getElementById('CurrencyId').value);
+            const isRecruiter = document.getElementById('IsRecruiter').checked;
+
+            if (!isNaN(grossBudget) && currencyId > 0) {
+                $.get('/Projects/CalculateBudget', { grossBudget: grossBudget, currencyId: currencyId, isRecruiter: isRecruiter }, function (response) {
+                    if (response.success) {
+                        document.getElementById('NetBudget').value = response.netBudget.toFixed(2);
+                        document.getElementById('BudgetInPKR').value = response.budgetInPKR.toFixed(2);
+                    } else {
+                        alert(response.message);
+                    }
+                });
+            }
+        }
     </script>
 }

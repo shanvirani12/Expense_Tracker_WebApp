@@ -1,45 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Expense_Tracker_WebApp.Data;
+using Expense_Tracker_WebApp.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Expense_Tracker_WebApp.Data;
-using Expense_Tracker_WebApp.Models;
-using Microsoft.AspNetCore.Authorization;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Expense_Tracker_WebApp.Controllers
 {
-    [Authorize(Roles = "Admin")]
     public class ProjectsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context; // Your DbContext
 
         public ProjectsController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-
-        // GET: Projects
+        // GET: ProjactsController
         public async Task<IActionResult> Index(int? accountId, string userEmail)
         {
             var projectsQuery = _context.Projects
-                .Include(p => p.Bid)
-                    .ThenInclude(b => b.Account)
-                .Include(p => p.Bid)
-                    .ThenInclude(b => b.User)
+                .Include(p => p.Account)
+                .Include(p => p.User)
                 .AsQueryable();
 
             if (accountId.HasValue)
             {
-                projectsQuery = projectsQuery.Where(p => p.Bid.AccountID == accountId.Value);
+                projectsQuery = projectsQuery.Where(p => p.AccountID == accountId.Value);
             }
 
             if (!string.IsNullOrEmpty(userEmail))
             {
-                projectsQuery = projectsQuery.Where(p => p.Bid.User.Email == userEmail);
+                projectsQuery = projectsQuery.Where(p => p.User.Email == userEmail);
             }
 
             var projects = await projectsQuery.ToListAsync();
@@ -47,11 +40,37 @@ namespace Expense_Tracker_WebApp.Controllers
             var accounts = await _context.Accounts.ToListAsync();
             var users = await _context.Users.ToListAsync();
 
-            ViewData["Accounts"] = new SelectList(accounts, "Id", "Name");
-            ViewData["Users"] = new SelectList(users, "Email", "Email");
+            ViewData["Accounts"] = new SelectList(accounts, "AccountID", "AccountName");
+            ViewData["Users"] = new SelectList(users, "UserEmail", "UserEmail");
 
             return View(projects);
         }
+
+
+        // GET: Projects/Create
+        public IActionResult Create()
+        {
+            ViewData["Bids"] = new SelectList(_context.Bids.Include(b => b.User).Include(b => b.Account), "BidId", "Link");
+            ViewData["CurrencyId"] = new SelectList(_context.Currencies, "Id", "Code");
+            return View();
+        }
+
+        // POST: Projects/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Projects project)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Add(project);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            ViewData["CurrencyId"] = new SelectList(_context.Currencies, "Id", "Code", project.CurrencyId);
+            return View(project);
+        }
+
+
 
         // GET: Projects/SearchBids
         public async Task<IActionResult> SearchBids(string query)
@@ -77,43 +96,27 @@ namespace Expense_Tracker_WebApp.Controllers
             return Json(bids);
         }
 
-        // GET: Projects/Details/5
-        public async Task<IActionResult> Details(int? id)
+        [HttpGet]
+        public IActionResult CalculateBudget(double grossBudget, int currencyId, bool isRecruiter)
         {
-            if (id == null)
+            var currency = _context.Currencies.Find(currencyId);
+
+            if (currency == null)
             {
-                return NotFound();
+                return Json(new { success = false, message = "Currency not found." });
             }
 
-            var project = await _context.Projects
-                .Include(p => p.Bid)
-                .FirstOrDefaultAsync(m => m.ProjectId == id);
-            if (project == null)
+            // Calculate platform fee based on IsRecruiter status
+            double platformFee = isRecruiter ? grossBudget * 0.15 : grossBudget * 0.10;
+            double netBudget = grossBudget - platformFee;
+            double budgetInPKR = netBudget * (double)currency.ExchangeRate;
+
+            return Json(new
             {
-                return NotFound();
-            }
-
-            return View(project);
-        }
-
-        public IActionResult Create()
-        {
-            var model = new Project();
-            return View(model);
-        }
-
-
-        // POST: Projects/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,BidId")] Project project)
-        {
-            _context.Add(project);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-
+                success = true,
+                netBudget = netBudget,
+                budgetInPKR = budgetInPKR
+            });
         }
 
 
@@ -125,64 +128,52 @@ namespace Expense_Tracker_WebApp.Controllers
                 return NotFound();
             }
 
-            var project = await _context.Projects.FindAsync(id);
+            var project = await _context.Projects
+                .Include(p => p.Currency) // Load related Currency entity
+                .FirstOrDefaultAsync(p => p.ProjectId == id);
+
             if (project == null)
             {
                 return NotFound();
             }
 
-            // Populate the SelectList for BidId
-            ViewData["BidId"] = new SelectList(_context.Bids, "Id", "Link", project.BidId);
-
+            ViewData["CurrencyId"] = new SelectList(_context.Currencies, "Id", "Code", project.CurrencyId);
             return View(project);
         }
 
         // POST: Projects/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,BidId")] Project project)
+        public async Task<IActionResult> Edit(int id, [Bind("ProjectId,ProjectName,ProjectClientName,ProjectLink,ProjectType,UserId,AccountID,AwardDate,IsRecruiter,Status,GrossBudget,CurrencyId,ClosingDate,AssignedTo,CostinPKR")] Projects project)
         {
             if (id != project.ProjectId)
             {
                 return NotFound();
             }
 
-            try
+            if (ModelState.IsValid)
             {
-                // Check if BidId is valid (exists in Bids table)
-                var bid = await _context.Bids.FindAsync(project.BidId);
-                if (bid == null)
+                try
                 {
-                    ModelState.AddModelError("BidId", "Invalid BidId selected.");
-                    ViewData["BidId"] = new SelectList(_context.Bids, "Id", "Link", project.BidId);
-                    return View(project);
+                    _context.Update(project);
+                    await _context.SaveChangesAsync();
                 }
-
-                // Update the project
-                _context.Update(project);
-                await _context.SaveChangesAsync();
-
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!ProjectExists(project.ProjectId))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
                 return RedirectToAction(nameof(Index));
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProjectExists(project.ProjectId))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-            catch (Exception ex)
-            {
-                // Log the exception
-                Console.WriteLine(ex.Message);
-                throw; // Optionally rethrow the exception for further investigation
-            }
+            ViewData["CurrencyId"] = new SelectList(_context.Currencies, "Id", "Code", project.CurrencyId);
+            return View(project);
         }
-
 
         // GET: Projects/Delete/5
         public async Task<IActionResult> Delete(int? id)
@@ -193,8 +184,9 @@ namespace Expense_Tracker_WebApp.Controllers
             }
 
             var project = await _context.Projects
-                .Include(p => p.Bid)
-                .FirstOrDefaultAsync(m => m.ProjectId == id);
+                .Include(p => p.Currency)
+                .FirstOrDefaultAsync(p => p.ProjectId == id);
+
             if (project == null)
             {
                 return NotFound();
@@ -209,11 +201,7 @@ namespace Expense_Tracker_WebApp.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var project = await _context.Projects.FindAsync(id);
-            if (project != null)
-            {
-                _context.Projects.Remove(project);
-            }
-
+            _context.Projects.Remove(project);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
@@ -222,5 +210,6 @@ namespace Expense_Tracker_WebApp.Controllers
         {
             return _context.Projects.Any(e => e.ProjectId == id);
         }
+
     }
 }

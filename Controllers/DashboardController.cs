@@ -32,7 +32,7 @@ namespace Expense_Tracker.Controllers
             ViewBag.TotalTodayBid = TotalTodayBid.ToString();
 
             int TotalProjectbyUser = await _context.Projects
-                .CountAsync(p => p.Bid.UserId == _userManager.GetUserId(User));
+                .CountAsync(p => p.UserId == _userManager.GetUserId(User));
             ViewBag.TotalProjectbyUser = TotalProjectbyUser.ToString();
 
             // Total Bids per User for Today
@@ -63,8 +63,7 @@ namespace Expense_Tracker.Controllers
                 .ToList();
 
             var selectedProjects = _context.Projects
-                .Include(p => p.Bid) // Include Bid data
-                .ThenInclude(b => b.User) // Include User data via Bid
+                .Include(p => p.User) // Include User data via Bid
                 .ToList();
 
             // Aggregate bids by user
@@ -79,7 +78,7 @@ namespace Expense_Tracker.Controllers
 
             // Aggregate projects by user
             var projectsSummary = selectedProjects
-                .GroupBy(p => p.Bid.User.FirstName) // Aggregate by user via Bid
+                .GroupBy(p => p.User.FirstName) // Aggregate by user via Bid
                 .Select(g => new
                 {
                     Username = g.Key,
@@ -116,11 +115,9 @@ namespace Expense_Tracker.Controllers
 
             // Fetch recent projects with related entities
             ViewBag.RecentProjects = await _context.Projects
-                .Include(p => p.Bid) // Include the Bid information
-                    .ThenInclude(b => b.Account) // Include the Account information within Bid
-                .Include(p => p.Bid) // Include Bid again to access User information
-                    .ThenInclude(b => b.User) // Include the User information within Bid
-                .OrderByDescending(p => p.Bid.DateTime) // Sort by the Bid's DateTime property
+                .Include(p => p.Account) // Include the Account information within Bid
+                .Include(p => p.User) // Include the User information within Bid
+                .OrderByDescending(p => p.AwardDate) // Sort by the Bid's DateTime property
                 .Take(5) // Get the top 5 recent projects
                 .ToListAsync();
 
