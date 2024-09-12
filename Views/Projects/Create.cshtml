@@ -14,6 +14,11 @@
         <input asp-for="ProjectName" class="form-control" />
     </div>
 
+    <div class="form-group">
+        <label asp-for="ProjectClientName"></label>
+        <input asp-for="ProjectClientName" class="form-control" />
+    </div>
+
     <!-- Bid Search -->
     <div class="mb-3">
         <ejs-textbox id="bidSearch" placeholder="Search Bid by Link" floatLabelType="Always"></ejs-textbox>
@@ -39,13 +44,36 @@
     <!-- Account Name -->
     <div class="mb-3">
         <label class="form-label text-white">Account Name</label>
-        <input type="text" id="AccountName" name="AccountName" class="form-control" readonly />
+        <input type="hidden" asp-for="AccountID" />
+        <input type="text" asp-for="Account" id="AccountName" name="AccountName" class="form-control" readonly />
     </div>
 
     <!-- User -->
     <div class="mb-3">
         <label class="form-label text-white">User</label>
-        <input type="text" id="UserName" name="UserName" class="form-control" readonly />
+        <input type="hidden" asp-for="UserId" />
+        <input type="text" asp-for="User" id="UserName" name="UserName" class="form-control" readonly />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="ProjectType" class="form-label text-white">Select Project Type</label>
+        <select id="TypeSelect" class="form-select" asp-for="ProjectType">
+            <option value="">Select a Project Type</option>
+            <option value="Graphic">Graphic</option>
+            <option value="Website">Website</option>
+        </select>
+        <span asp-validation-for="ProjectType" class="text-danger fs-6"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Status" class="form-label text-white">Select a Status of Project</label>
+        <select id="StatusSelect" class="form-select" asp-for="Status">
+            <option value="">Select a Project Type</option>
+            <option value="Awarded">Awarded</option>
+            <option value="InProgress">In-Progress</option>
+            <option value="Completed">Completed</option>
+        </select>
+        <span asp-validation-for="Status" class="text-danger fs-6"></span>
     </div>
 
     <!-- IsRecruiter Checkbox -->
@@ -67,6 +95,7 @@
                 <option value="@currency.Value">@currency.Text</option>
             }
         </select>
+
     </div>
 
     <div class="form-group">
@@ -75,8 +104,14 @@
     </div>
 
     <div class="form-group">
-        <label>Budget in PKR</label>
-        <input id="BudgetInPKR" class="form-control" readonly />
+        <label asp-for="BudgetInPKR">Budget in PKR</label>
+        <input asp-for="BudgetInPKR" id="BudgetInPKR" class="form-control" readonly />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="AwardDate"></label>
+        <input asp-for="AwardDate" class="form-control" type="date" />
+        <span asp-validation-for="AwardDate" class="text-danger fs-6"></span>
     </div>
 
     <div class="form-group">
@@ -123,7 +158,7 @@
                     data.forEach(function (bid) {
                         var option = document.createElement("option");
                         option.value = bid.id;
-                        option.text = `Link: ${bid.link}, Employee: ${bid.user}, Account: ${bid.account}`;
+                        option.text = `Link: ${bid.link}, Employee: ${bid.user},ID: ${bid.userId}, Account: ${bid.account}, ID: ${bid.accountId}`;
                         select.appendChild(option);
                     });
 
@@ -134,10 +169,15 @@
                             document.getElementById('ProjectLink').value = selectedBid.link;
                             document.getElementById('AccountName').value = selectedBid.account;
                             document.getElementById('UserName').value = selectedBid.user;
+                            document.getElementById('AccountID').value = selectedBid.accountId;
+                            document.getElementById('UserId').value = selectedBid.userId;
+                            
                         } else {
                             document.getElementById('ProjectLink').value = '';
                             document.getElementById('AccountName').value = '';
                             document.getElementById('UserName').value = '';
+                            document.getElementById('AccountID').value = '';
+                            document.getElementById('UserId').value = '';
                         }
                     });
                 })

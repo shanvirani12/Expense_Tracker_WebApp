@@ -60,6 +60,10 @@ namespace Expense_Tracker_WebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Projects project)
         {
+            project.User = await _context.Users.FindAsync(project.UserId);
+            project.Account = await _context.Accounts.FindAsync(project.AccountID);
+            project.Currency = await _context.Currencies.FindAsync(project.CurrencyId);
+
             if (ModelState.IsValid)
             {
                 _context.Add(project);
@@ -67,6 +71,7 @@ namespace Expense_Tracker_WebApp.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["CurrencyId"] = new SelectList(_context.Currencies, "Id", "Code", project.CurrencyId);
+
             return View(project);
         }
 
@@ -89,7 +94,9 @@ namespace Expense_Tracker_WebApp.Controllers
                     id = b.BidId,
                     link = b.Link,
                     user = b.User.UserName,
-                    account = b.Account.Name
+                    account = b.Account.Name,
+                    userId = b.User.Id,
+                    accountId = b.Account.Id 
                 })
                 .ToListAsync();
 

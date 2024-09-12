@@ -55,13 +55,13 @@ namespace Expense_Tracker_WebApp.Models
             get;set;
         }
 
-        public DateTime ClosingDate { get; set; }
+        public DateTime? ClosingDate { get; set; }
 
         [Column(TypeName = "nvarchar(100)")]
-        public string AssignedTo { get; set; }
+        public string? AssignedTo { get; set; }
 
         [Column(TypeName = "decimal(18, 2)")]
-        public double CostinPKR { get; set; } // Designer or developer fee
+        public double? CostinPKR { get; set; } // Designer or developer fee
 
         [NotMapped]
         public double PlatformFee
