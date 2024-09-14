@@ -1,79 +1,84 @@
 ﻿@model Expense_Tracker_WebApp.Models.Projects
 @{
     ViewData["Title"] = "Edit Project";
-    Layout = "~/Views/Shared/_Layout.cshtml";
-}
 
-<link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.1.3/darkly/bootstrap.min.css" rel="stylesheet" />
+}
 
 <h2>Edit Project</h2>
 
-<form asp-action="Edit">
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="ProjectId" />
+    
     <div class="form-group">
         <label asp-for="ProjectName"></label>
         <input asp-for="ProjectName" class="form-control" />
-        <span asp-validation-for="ProjectName" class="text-danger"></span>
     </div>
 
     <div class="form-group">
         <label asp-for="ProjectClientName"></label>
         <input asp-for="ProjectClientName" class="form-control" />
-        <span asp-validation-for="ProjectClientName" class="text-danger"></span>
     </div>
 
-    <div class="form-group">
-        <label asp-for="ProjectLink">Bid Link</label>
-        <input asp-for="ProjectLink" class="form-control" />
-        <span asp-validation-for="ProjectLink" class="text-danger"></span>
+    <!-- Project Link -->
+    <div class="mb-3">
+        <label asp-for="ProjectLink" class="form-label text-white">Project Link</label>
+        <input type="text" id="ProjectLink" asp-for="ProjectLink" class="form-control" readonly />
+        <span asp-validation-for="ProjectLink" class="text-danger fs-6"></span>
     </div>
 
-    <div class="form-group">
-        <label asp-for="ProjectType"></label>
-        <input asp-for="ProjectType" class="form-control" />
-        <span asp-validation-for="ProjectType" class="text-danger"></span>
+    <!-- Account Name -->
+    <div class="mb-3">
+        <label class="form-label text-white">Account Name</label>
+        <input type="hidden" asp-for="AccountID" />
+        <input type="text" asp-for="Account.Name" id="AccountName" name="AccountName" class="form-control" readonly />
+        <input type="hidden" asp-for="Account" id="Account" name="AccountName" class="form-control" readonly />
     </div>
 
-    <div class="form-group">
-        <label asp-for="UserId">User</label>
-        <input asp-for="UserId" class="form-control" />
-        <span asp-validation-for="UserId" class="text-danger"></span>
+    <!-- User -->
+    <div class="mb-3">
+        <label class="form-label text-white">User</label>
+        <input type="hidden" asp-for="UserId" />
+        <input type="text" asp-for="User.FirstName" id="UserName" name="UserName" class="form-control" readonly />
     </div>
 
-    <div class="form-group">
-        <label asp-for="AccountID">Account</label>
-        <input asp-for="AccountID" class="form-control" />
-        <span asp-validation-for="AccountID" class="text-danger"></span>
+    <div class="mb-3">
+        <label asp-for="ProjectType" class="form-label text-white">Select Project Type</label>
+        <select id="TypeSelect" class="form-select" asp-for="ProjectType">
+            <option value="">Select a Project Type</option>
+            <option value="Graphic">Graphic</option>
+            <option value="Website">Website</option>
+        </select>
+        <span asp-validation-for="ProjectType" class="text-danger fs-6"></span>
     </div>
 
-    <div class="form-group">
-        <label asp-for="AwardDate"></label>
-        <input asp-for="AwardDate" class="form-control" type="date" />
-        <span asp-validation-for="AwardDate" class="text-danger"></span>
+    <div class="mb-3">
+        <label asp-for="Status" class="form-label text-white">Select a Status of Project</label>
+        <select id="StatusSelect" class="form-select" asp-for="Status">
+            <option value="">Select a Project Type</option>
+            <option value="Awarded">Awarded</option>
+            <option value="InProgress">In-Progress</option>
+            <option value="Completed">Completed</option>
+        </select>
+        <span asp-validation-for="Status" class="text-danger fs-6"></span>
     </div>
 
+    <!-- IsRecruiter Checkbox -->
     <div class="form-group">
         <label asp-for="IsRecruiter"></label>
-        <input asp-for="IsRecruiter" type="checkbox" class="form-check-input" />
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Status"></label>
-        <input asp-for="Status" class="form-control" />
-        <span asp-validation-for="Status" class="text-danger"></span>
+        <input asp-for="IsRecruiter" type="checkbox" class="form-check-input" id="IsRecruiter" onclick="calculateBudget()" />
     </div>
 
     <div class="form-group">
         <label asp-for="GrossBudget"></label>
         <input asp-for="GrossBudget" id="GrossBudget" class="form-control" oninput="calculateBudget()" />
-        <span asp-validation-for="GrossBudget" class="text-danger"></span>
     </div>
 
     <div class="form-group">
         <label asp-for="CurrencyId">Currency</label>
         <select asp-for="CurrencyId" class="form-control" id="CurrencyId" onchange="calculateBudget()">
-            @foreach (var currency in ViewData["CurrencyId"] as SelectList)
+            @foreach (var currency in ViewData["Currencies"] as SelectList)
             {
-                <option value="@currency.Value">@currency.Text</option>
+                <option value="@currency.Value" selected="@Model.CurrencyId == (int)currency.Value">@currency.Text</option>
             }
         </select>
     </div>
@@ -81,45 +86,50 @@
     <div class="form-group">
         <label asp-for="NetBudget"></label>
         <input asp-for="NetBudget" id="NetBudget" class="form-control" readonly />
-        <span asp-validation-for="NetBudget" class="text-danger"></span>
     </div>
 
     <div class="form-group">
-        <label>Budget in PKR</label>
-        <input id="BudgetInPKR" class="form-control" readonly />
+        <label asp-for="BudgetInPKR">Budget in PKR</label>
+        <input asp-for="BudgetInPKR" id="BudgetInPKR" class="form-control" readonly />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="AwardDate"></label>
+        <input asp-for="AwardDate" class="form-control" type="date" />
+        <span asp-validation-for="AwardDate" class="text-danger fs-6"></span>
     </div>
 
     <div class="form-group">
         <label asp-for="ClosingDate"></label>
         <input asp-for="ClosingDate" class="form-control" type="date" />
-        <span asp-validation-for="ClosingDate" class="text-danger"></span>
     </div>
 
     <div class="form-group">
         <label asp-for="AssignedTo"></label>
         <input asp-for="AssignedTo" class="form-control" />
-        <span asp-validation-for="AssignedTo" class="text-danger"></span>
     </div>
 
     <div class="form-group">
         <label asp-for="CostinPKR"></label>
         <input asp-for="CostinPKR" class="form-control" />
-        <span asp-validation-for="CostinPKR" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-success">Save</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    <button type="submit" class="btn btn-success">Save Changes</button>
 </form>
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
+
+        window.searchBids = searchBids;
+
         function calculateBudget() {
             const grossBudget = parseFloat(document.getElementById('GrossBudget').value);
             const currencyId = parseInt(document.getElementById('CurrencyId').value);
+            const isRecruiter = document.getElementById('IsRecruiter').checked;
 
             if (!isNaN(grossBudget) && currencyId > 0) {
-                $.get('/Projects/CalculateBudget', { grossBudget: grossBudget, currencyId: currencyId }, function (response) {
+                $.get('/Projects/CalculateBudget', { grossBudget: grossBudget, currencyId: currencyId, isRecruiter: isRecruiter }, function (response) {
                     if (response.success) {
                         document.getElementById('NetBudget').value = response.netBudget.toFixed(2);
                         document.getElementById('BudgetInPKR').value = response.budgetInPKR.toFixed(2);
@@ -131,3 +141,4 @@
         }
     </script>
 }
+

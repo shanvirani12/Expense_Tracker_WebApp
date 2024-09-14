@@ -1,5 +1,6 @@
 ﻿using Expense_Tracker_WebApp.Data;
 using Expense_Tracker_WebApp.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -8,6 +9,7 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Expense_Tracker_WebApp.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class ProjectsController : Controller
     {
         private readonly ApplicationDbContext _context; // Your DbContext
@@ -23,11 +25,12 @@ namespace Expense_Tracker_WebApp.Controllers
             var projectsQuery = _context.Projects
                 .Include(p => p.Account)
                 .Include(p => p.User)
+                .Include(p => p.Currency)
                 .AsQueryable();
 
             if (accountId.HasValue)
             {
-                projectsQuery = projectsQuery.Where(p => p.AccountID == accountId.Value);
+                projectsQuery = projectsQuery.Where(p => p.Account.Id == accountId.Value);
             }
 
             if (!string.IsNullOrEmpty(userEmail))
@@ -39,10 +42,11 @@ namespace Expense_Tracker_WebApp.Controllers
 
             var accounts = await _context.Accounts.ToListAsync();
             var users = await _context.Users.ToListAsync();
+            var currencies = await _context.Currencies.ToListAsync();
 
             ViewData["Accounts"] = new SelectList(accounts, "AccountID", "AccountName");
             ViewData["Users"] = new SelectList(users, "UserEmail", "UserEmail");
-
+            ViewBag.Currencies = currencies;
             return View(projects);
         }
 
@@ -59,20 +63,13 @@ namespace Expense_Tracker_WebApp.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Projects project)
-        {
+        {          
             project.User = await _context.Users.FindAsync(project.UserId);
             project.Account = await _context.Accounts.FindAsync(project.AccountID);
             project.Currency = await _context.Currencies.FindAsync(project.CurrencyId);
-
-            if (ModelState.IsValid)
-            {
-                _context.Add(project);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["CurrencyId"] = new SelectList(_context.Currencies, "Id", "Code", project.CurrencyId);
-
-            return View(project);
+            _context.Add(project);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
 
@@ -93,10 +90,13 @@ namespace Expense_Tracker_WebApp.Controllers
                 {
                     id = b.BidId,
                     link = b.Link,
-                    user = b.User.UserName,
-                    account = b.Account.Name,
+                    username = b.User.UserName,
+                    accountname = b.Account.Name,
                     userId = b.User.Id,
-                    accountId = b.Account.Id 
+                    accountId = b.Account.Id,
+                    user = b.User,
+                    account = b.Account
+                    
                 })
                 .ToListAsync();
 
@@ -136,6 +136,8 @@ namespace Expense_Tracker_WebApp.Controllers
             }
 
             var project = await _context.Projects
+                .Include(p => p.Account)
+                .Include(p => p.User)
                 .Include(p => p.Currency) // Load related Currency entity
                 .FirstOrDefaultAsync(p => p.ProjectId == id);
 
@@ -144,22 +146,30 @@ namespace Expense_Tracker_WebApp.Controllers
                 return NotFound();
             }
 
-            ViewData["CurrencyId"] = new SelectList(_context.Currencies, "Id", "Code", project.CurrencyId);
+            // Ensure Currencies list is not null
+            var currencies = await _context.Currencies.ToListAsync();
+            if (currencies == null)
+            {
+                return NotFound(); // Or handle this case as needed
+            }
+
+            ViewData["Currencies"] = new SelectList(currencies, "Id", "Code", project.CurrencyId);
             return View(project);
         }
+
+
 
         // POST: Projects/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ProjectId,ProjectName,ProjectClientName,ProjectLink,ProjectType,UserId,AccountID,AwardDate,IsRecruiter,Status,GrossBudget,CurrencyId,ClosingDate,AssignedTo,CostinPKR")] Projects project)
+        public async Task<IActionResult> Edit(int id,Projects project)
         {
             if (id != project.ProjectId)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
-            {
+            
                 try
                 {
                     _context.Update(project);
@@ -177,9 +187,6 @@ namespace Expense_Tracker_WebApp.Controllers
                     }
                 }
                 return RedirectToAction(nameof(Index));
-            }
-            ViewData["CurrencyId"] = new SelectList(_context.Currencies, "Id", "Code", project.CurrencyId);
-            return View(project);
         }
 
         // GET: Projects/Delete/5
@@ -217,6 +224,29 @@ namespace Expense_Tracker_WebApp.Controllers
         {
             return _context.Projects.Any(e => e.ProjectId == id);
         }
+
+        // GET: Projects/Details/5
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var project = await _context.Projects
+                .Include(p => p.Currency)  // Load related Currency entity
+                .Include(p => p.Account)    // Load related Account entity
+                .Include(p => p.User)       // Load related User entity
+                .FirstOrDefaultAsync(p => p.ProjectId == id);
+
+            if (project == null)
+            {
+                return NotFound();
+            }
+
+            return View(project);
+        }
+
 
     }
 }

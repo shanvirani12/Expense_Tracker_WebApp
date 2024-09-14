@@ -6,30 +6,31 @@
     ViewData["PageActionUrl"] = "/Projects/Create";
 }
 
-<div class="row">
-    <div class="col-md-7">
+<div>
+    <div>
         <ejs-grid id="projects" dataSource="@Model" gridLines="None"
                   allowSorting="true" allowPaging="true">
             <e-grid-pagesettings pageSize="10"></e-grid-pagesettings>
             <e-grid-columns>
-                <e-grid-column headerText="Project Name" field="Name"></e-grid-column>
-                <e-grid-column headerText="Bid Link" template="#bidLinkTemplate" width="150px"></e-grid-column>
-                <e-grid-column headerText="User Email" field="Bid.User.Email"></e-grid-column>
-                <e-grid-column headerText="Account Name" field="Bid.Account.Name"></e-grid-column>
+                <e-grid-column headerText="Project Name" template="#bidLinkTemplate"></e-grid-column>
+                <e-grid-column headerText="User Email" field="User.Email"></e-grid-column> <!-- Corrected -->
+                <e-grid-column headerText="Account Name" field="Account.Name"></e-grid-column> <!-- Corrected -->
+                <e-grid-column headerText="Budget" template="#budgetTemplate" width="150px"></e-grid-column>
                 <e-grid-column headerText="Actions" template="#actionColumnTemplate" width="150px"></e-grid-column>
             </e-grid-columns>
         </ejs-grid>
     </div>
-    <div class="col-md-5">
-        <div class="widget h-100 d-flex justify-content-center align-items-center">
-            <i class="fa-solid fa-project-diagram fa-2xl"></i>
-        </div>
-    </div>
 </div>
 
 <script id="bidLinkTemplate" type="text/x-template">
-    <a href="${Bid.Link}" target="_blank">${Bid.Link}</a>
+    <a href="${ProjectLink}" target="_blank">${ProjectName}</a>
 </script>
+
+
+<script id="budgetTemplate" type="text/x-template">
+    ${Currency.Code} ${NetBudget}
+</script>
+
 
 <script id="actionColumnTemplate" type="text/x-template">
     <div class="d-flex flex-row justify-content-start">
@@ -42,7 +43,7 @@
         <form action="/Projects/Delete/${ProjectId}" method="post">
     @Html.AntiForgeryToken()
             <button type="submit" class="btn btn-sm btn-link no-a-decoration"
-            onclick="return confirm(&quot;Are you sure you want to delete this project?&quot;)">
+                    onclick="return confirm(&quot;Are you sure you want to delete this project?&quot;)">
                 <i class="fa-solid fa-trash-can fa-lg text-danger"></i>
             </button>
         </form>

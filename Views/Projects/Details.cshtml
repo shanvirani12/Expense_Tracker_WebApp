@@ -1,0 +1,116 @@
+﻿@model Expense_Tracker_WebApp.Models.Projects
+
+@{
+    ViewData["Title"] = "Project Details";
+}
+
+<h2>Project Details</h2>
+
+<div class="container">
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label class="form-label">Project Name:</label>
+            <p>@Model.ProjectName</p>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Client Name:</label>
+            <p>@Model.ProjectClientName</p>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Project Link:</label>
+            <p>@Model.ProjectLink</p>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label class="form-label">Account Name:</label>
+            <p>@Model.Account?.Name</p>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">User:</label>
+            <p>@Model.User?.Email</p>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Project Type:</label>
+            <p>@Model.ProjectType</p>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label class="form-label">Status:</label>
+            <p>@Model.Status</p>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Gross Budget:</label>
+            <p id="GrossBudget">@Model.GrossBudget</p>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Currency:</label>
+            <input type="hidden" id="CurrencyId" value="@Model.Currency.Id" />
+            <p>@Model.Currency?.Code</p>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label class="form-label">Net Budget:</label>
+            <p id="NetBudget">@Model.NetBudget</p>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Budget in PKR:</label>
+            <p id="BudgetInPKR">@Model.BudgetInPKR</p>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Award Date:</label>
+            <p>@Model.AwardDate.ToString("d")</p>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label class="form-label">Closing Date:</label>
+            <p>@Model.ClosingDate?.ToString("d")</p>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Assigned To:</label>
+            <p>@Model.AssignedTo</p>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Cost in PKR:</label>
+            <p>@Model.CostinPKR</p>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <a asp-action="Edit" asp-route-id="@Model.ProjectId" class="btn btn-primary">Edit</a>
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function calculateBudget() {
+            const grossBudget = parseFloat(document.getElementById('GrossBudget').textContent);
+            const currencyId = parseInt(document.getElementById('CurrencyId').value);
+
+            if (!isNaN(grossBudget) && currencyId > 0) {
+                $.get('/Projects/CalculateBudget', { grossBudget: grossBudget, currencyId: currencyId }, function (response) {
+                    if (response.success) {
+                        document.getElementById('NetBudget').textContent = response.netBudget.toFixed(2);
+                        document.getElementById('BudgetInPKR').textContent = response.budgetInPKR.toFixed(2);
+                    } else {
+                        alert(response.message);
+                    }
+                });
+            }
+        }
+
+        // Automatically calculate budget when page loads
+        $(document).ready(function () {
+            calculateBudget();
+        });
+    </script>
+}
