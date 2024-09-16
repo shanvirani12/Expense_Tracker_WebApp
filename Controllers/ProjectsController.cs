@@ -153,6 +153,7 @@ namespace Expense_Tracker_WebApp.Controllers
                 return NotFound(); // Or handle this case as needed
             }
 
+            ViewBag.BudgetInPKR = project.NetBudget * (double)project.Currency.ExchangeRate;
             ViewData["Currencies"] = new SelectList(currencies, "Id", "Code", project.CurrencyId);
             return View(project);
         }

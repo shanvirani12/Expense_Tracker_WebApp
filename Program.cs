@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.UI;
+using Expense_Tracker_WebApp.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,7 +41,7 @@ builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfi
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-
+builder.Services.AddScoped<PayrollService>();
 
 
 var app = builder.Build();
@@ -65,6 +66,10 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "Accounts",
     pattern: "{controller=Accounts}/{action=Index}/{id?}");
+
+app.MapControllerRoute(
+    name: "Payroll",
+    pattern: "{controller=Payroll}/{action=GeneratePayroll}/{id?}");
 
 app.MapRazorPages();
 

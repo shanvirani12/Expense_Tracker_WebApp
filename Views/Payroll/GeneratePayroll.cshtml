@@ -1,0 +1,43 @@
+﻿@model Expense_Tracker_WebApp.Models.GeneratePayrollViewModel
+
+@{
+    ViewData["Title"] = "Generate Payroll";
+}
+
+<h2>Generate Payroll for @Model.MonthYear.ToString("MMMM yyyy")</h2>
+
+<form asp-action="GeneratePayroll" method="post">
+    <input type="hidden" asp-for="MonthYear" />
+
+    <table class="table table-dark">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Basic Salary</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Users != null && Model.Users.Any())
+            {
+                @foreach (var user in Model.Users)
+                {
+                    <tr>
+                        <td>@user.FirstName @user.LastName</td>
+                        <td>
+                            <input type="hidden" name="UserSalaries[@Model.Users.IndexOf(user)].UserId" value="@user.Id" />
+                            <input type="number" name="UserSalaries[@Model.Users.IndexOf(user)].Salary" class="form-control" />
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="2">No users available</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <button type="submit" class="btn btn-primary">Generate Payroll</button>
+</form>

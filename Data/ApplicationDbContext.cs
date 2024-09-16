@@ -11,6 +11,9 @@ namespace Expense_Tracker_WebApp.Data
         public DbSet<Account> Accounts { get; set; }
         public DbSet<Currency> Currencies { get; set; }
         public DbSet<Projects> Projects { get; set; }
+        public DbSet<Payslip> Payslips { get; set; }
+        public DbSet<Payroll> Payrolls { get; set; }
+
         public ApplicationDbContext(DbContextOptions options)
              : base(options)
         {

@@ -1,0 +1,33 @@
+﻿@model List<Expense_Tracker_WebApp.Models.Payroll>
+
+@{
+    ViewData["Title"] = "Review Payroll";
+}
+
+<h2>Review Payroll for @Model.FirstOrDefault()?.MonthYear.ToString("MMMM yyyy")</h2>
+
+<table class="table table-dark">
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>Basic Salary</th>
+            <th>Total Commission</th>
+            <th>Total Salary</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var payroll in Model)
+        {
+            <tr>
+                <td>@payroll.User.FirstName @payroll.User.LastName</td>
+                <td>PKR @payroll.BasicSalary.ToString()</td>
+                <td>PKR @payroll.TotalCommission.ToString()</td>
+                <td>PKR @payroll.TotalSalary.ToString()</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="DownloadPayrollPdf" asp-route-monthYear="@Model.FirstOrDefault()?.MonthYear" class="btn btn-primary">
+    Download Payroll as PDF
+</a>
